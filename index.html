@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skull King — Compteur de points</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a1520;
+      --surface: #12223a;
+      --surface2: #1a3050;
+      --gold: #f0c040;
+      --gold-dim: #a07820;
+      --gold-light: #fde68a;
+      --text: #e8ddc8;
+      --text-dim: #7a8fa8;
+      --red: #e05050;
+      --green: #50c878;
+      --btn-bg: #1e3452;
+      --btn-hover: #2a4470;
+      --radius: 6px;
+      --plank: repeating-linear-gradient(
+        180deg,
+        transparent 0px, transparent 38px,
+        rgba(0,0,0,0.18) 38px, rgba(0,0,0,0.18) 40px
+      );
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Crimson Text', Georgia, serif;
+      background-color: var(--bg);
+      background-image:
+        var(--plank),
+        repeating-linear-gradient(
+          92deg,
+          transparent 0px, transparent 58px,
+          rgba(255,255,255,0.02) 58px, rgba(255,255,255,0.02) 60px
+        );
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      font-family: 'Pirata One', cursive;
+      font-size: 2.8rem;
+      color: var(--gold);
+      text-align: center;
+      letter-spacing: 3px;
+      text-shadow: 0 2px 12px rgba(240,192,64,0.35), 0 0 40px rgba(240,192,64,0.1);
+      padding: 1.5rem 1rem 0.25rem;
+      line-height: 1.1;
+    }
+    h2 {
+      font-family: 'Pirata One', cursive;
+      color: var(--gold);
+      font-size: 1.3rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      letter-spacing: 1px;
+    }
+    .subtitle {
+      color: var(--text-dim);
+      text-align: center;
+      margin-bottom: 0.75rem;
+      font-size: 1rem;
+      font-style: italic;
+    }
+    .skull-divider {
+      text-align: center;
+      color: var(--gold-dim);
+      font-size: 1rem;
+      letter-spacing: 8px;
+      margin-bottom: 1.5rem;
+      opacity: 0.6;
+    }
+    .container {
+      width: 100%;
+      max-width: 600px;
+      padding: 1rem;
+    }
+
+    /* Setup */
+    .player-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    .player-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+    .player-row input {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--surface2);
+      border-radius: var(--radius);
+      color: var(--text);
+      padding: 0.6rem 0.8rem;
+      font-size: 1.05rem;
+      font-family: 'Crimson Text', Georgia, serif;
+    }
+    .player-row input:focus { outline: none; border-color: var(--gold-dim); }
+    .btn-icon {
+      background: var(--btn-bg);
+      border: none;
+      border-radius: var(--radius);
+      color: var(--text);
+      width: 2.2rem;
+      height: 2.2rem;
+      font-size: 1.3rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-icon:hover { background: var(--btn-hover); }
+    .btn-icon:disabled { opacity: 0.3; cursor: not-allowed; }
+    .btn-icon.remove { color: var(--red); }
+    .btn-row {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: center;
+      margin-bottom: 1rem;
+    }
+    .btn {
+      background: linear-gradient(160deg, #d4a830 0%, #f0c040 45%, #c8941c 100%);
+      color: #1a0e00;
+      border: none;
+      border-radius: var(--radius);
+      padding: 0.7rem 1.8rem;
+      font-size: 1.1rem;
+      font-family: 'Pirata One', cursive;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: opacity 0.15s, box-shadow 0.15s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.15);
+      text-shadow: 0 1px 0 rgba(255,255,255,0.2);
+    }
+    .btn:hover { opacity: 0.88; box-shadow: 0 4px 14px rgba(0,0,0,0.5); }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .btn.secondary { background: var(--btn-bg); color: var(--text); box-shadow: none; }
+
+    /* Round header */
+    .round-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      background: var(--surface);
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      border: 1px solid rgba(240,192,64,0.2);
+    }
+    .round-label {
+      font-family: 'Pirata One', cursive;
+      font-size: 1.25rem;
+      color: var(--gold);
+      letter-spacing: 1px;
+    }
+    .scoreboard-mini { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .score-chip { font-size: 0.8rem; color: var(--text-dim); }
+    .score-chip span { color: var(--text); font-weight: 600; }
+
+    /* Player cards */
+    .player-card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      border: 1px solid rgba(240,192,64,0.15);
+      border-left: 3px solid var(--gold-dim);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
+    .player-name {
+      font-family: 'Pirata One', cursive;
+      font-size: 1.15rem;
+      margin-bottom: 0.75rem;
+      color: var(--gold-light);
+      letter-spacing: 0.5px;
+    }
+    .fields {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.5rem;
+    }
+    .field-col { display: flex; flex-direction: column; align-items: center; }
+    .field-label { font-size: 0.72rem; color: var(--text-dim); text-align: center; margin-bottom: 0.3rem; }
+    .counter { display: flex; align-items: center; justify-content: center; gap: 0.4rem; }
+    .counter-val { min-width: 2rem; text-align: center; font-size: 1.2rem; font-weight: 600; }
+    .btn-counter {
+      background: var(--btn-bg);
+      border: none;
+      border-radius: 6px;
+      color: var(--text);
+      width: 2rem;
+      height: 2rem;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .btn-counter:hover { background: var(--btn-hover); }
+    .btn-counter:disabled { opacity: 0.3; cursor: not-allowed; }
+    .bonus-note { font-size: 0.65rem; color: var(--text-dim); text-align: center; margin-top: 0.2rem; height: 0.9rem; }
+    .round-score { text-align: right; font-size: 0.85rem; margin-top: 0.6rem; color: var(--text-dim); }
+    .round-score .val { font-weight: 700; font-size: 1rem; }
+    .round-score .pos { color: var(--green); }
+    .round-score .neg { color: var(--red); }
+    .round-score .zero { color: var(--text-dim); }
+
+    /* Scoreboard */
+    .scoreboard {
+      background: var(--surface);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-top: 1.5rem;
+      border: 1px solid rgba(240,192,64,0.15);
+    }
+    .scoreboard table { width: 100%; border-collapse: collapse; }
+    .scoreboard th {
+      background: var(--surface2);
+      padding: 0.5rem 0.6rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--gold-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: 'Pirata One', cursive;
+    }
+    .scoreboard th:first-child { text-align: left; }
+    .scoreboard td { padding: 0.5rem 0.6rem; border-top: 1px solid var(--surface2); font-size: 0.85rem; text-align: center; }
+    .scoreboard td:first-child { text-align: left; }
+    .scoreboard tr.leader td { color: var(--gold); font-weight: 600; }
+
+    /* End */
+    .podium { text-align: center; margin: 1.5rem 0; }
+    .podium-trophy { font-size: 3.5rem; margin-bottom: 0.5rem; filter: drop-shadow(0 0 12px rgba(240,192,64,0.5)); }
+    .podium-name { font-family: 'Pirata One', cursive; font-size: 2.2rem; color: var(--gold); letter-spacing: 2px; text-shadow: 0 0 20px rgba(240,192,64,0.4); }
+    .podium-score { font-size: 1.1rem; color: var(--text-dim); margin-top: 0.25rem; font-style: italic; }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 380px) {
+      h1 { font-size: 2rem; }
+      .btn-counter { width: 1.8rem; height: 1.8rem; font-size: 1rem; }
+      .counter-val { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- VUE : SETUP -->
+  <div id="view-setup">
+    <h1>&#9760; Skull King &#9760;</h1>
+    <p class="subtitle">Compteur de points</p>
+    <div class="skull-divider">~ &#9760; ~</div>
+    <div class="container">
+      <h2>&#9875; Équipage (2 – 8)</h2>
+      <div class="player-list" id="player-list"></div>
+      <div class="btn-row">
+        <button class="btn-icon" id="btn-add-player" title="Ajouter un joueur" style="font-size:1.5rem">+</button>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="btn-start">&#9875; Appareiller !</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VUE : MANCHE -->
+  <div id="view-round" class="hidden">
+    <h1>&#9760; Skull King &#9760;</h1>
+    <div class="container">
+      <div class="round-header">
+        <div class="round-label" id="round-label">Manche 1 / 10</div>
+        <div class="scoreboard-mini" id="scoreboard-mini"></div>
+      </div>
+      <div id="player-cards"></div>
+      <div class="btn-row" style="margin-top:1rem">
+        <button class="btn" id="btn-validate">&#9876; Valider la manche</button>
+      </div>
+      <div class="scoreboard hidden" id="scoreboard-full">
+        <table>
+          <thead id="scoreboard-head"></thead>
+          <tbody id="scoreboard-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- VUE : FIN -->
+  <div id="view-end" class="hidden">
+    <h1>&#9760; Skull King &#9760;</h1>
+    <div class="container">
+      <div class="podium" id="podium"></div>
+      <div class="scoreboard">
+        <table>
+          <thead id="final-head"></thead>
+          <tbody id="final-body"></tbody>
+        </table>
+      </div>
+      <div class="btn-row" style="margin-top:2rem">
+        <button class="btn" id="btn-restart">&#9875; Nouvelle partie</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let players = [];
+    let round = 1;
+    let roundData = [];
+    let history = [];
+    const MAX_ROUNDS = 10;
+
+    // ── SETUP ──────────────────────────────────────────────
+
+    function initSetup() {
+      players = [{ name: '' }, { name: '' }];
+      renderSetup();
+    }
+
+    function renderSetup() {
+      const list = document.getElementById('player-list');
+      list.innerHTML = '';
+      players.forEach((p, i) => {
+        const row = document.createElement('div');
+        row.className = 'player-row';
+        row.innerHTML = `
+          <input type="text" value="${escHtml(p.name)}" placeholder="Joueur ${i + 1}" data-idx="${i}" maxlength="20">
+          ${players.length > 2
+            ? `<button class="btn-icon remove" data-remove="${i}" title="Retirer">&#x2212;</button>`
+            : ''}
+        `;
+        list.appendChild(row);
+      });
+      const addBtn = document.getElementById('btn-add-player');
+      addBtn.disabled = players.length >= 8;
+      document.getElementById('btn-start').disabled = players.length < 2;
+    }
+
+    document.getElementById('player-list').addEventListener('input', e => {
+      const idx = e.target.dataset.idx;
+      if (idx !== undefined) players[+idx].name = e.target.value || `Joueur ${+idx + 1}`;
+    });
+
+    document.getElementById('player-list').addEventListener('click', e => {
+      const btn = e.target.closest('[data-remove]');
+      if (btn) {
+        players.splice(+btn.dataset.remove, 1);
+        renderSetup();
+      }
+    });
+
+    document.getElementById('btn-add-player').addEventListener('click', () => {
+      if (players.length < 8) {
+        players.push({ name: '' });
+        renderSetup();
+      }
+    });
+
+    document.getElementById('btn-start').addEventListener('click', () => {
+      document.querySelectorAll('#player-list input').forEach((inp, i) => {
+        players[i].name = inp.value.trim() || `Joueur ${i + 1}`;
+      });
+      players = players.map(p => ({ name: p.name, total: 0 }));
+      history = [];
+      round = 1;
+      startRound();
+    });
+
+    // ── MANCHE ────────────────────────────────────────────
+
+    function startRound() {
+      roundData = players.map(() => ({ bid: 0, tricks: 0, bonus: 0 }));
+      showView('view-round');
+      renderRound();
+    }
+
+    function calcScore(bid, tricks, bonus, r) {
+      if (bid === 0) return tricks === 0 ? 10 * r : -10 * r;
+      if (bid === tricks) return 20 * tricks + bonus;
+      return -10 * Math.abs(bid - tricks);
+    }
+
+    function renderRound() {
+      document.getElementById('round-label').textContent = `Manche ${round} / ${MAX_ROUNDS}`;
+      renderMini();
+      renderCards();
+      renderFullScoreboard();
+    }
+
+    function renderMini() {
+      document.getElementById('scoreboard-mini').innerHTML = players.map(p =>
+        `<div class="score-chip">${escHtml(p.name)}&nbsp;<span>${p.total}</span></div>`
+      ).join('');
+    }
+
+    function renderCards() {
+      const el = document.getElementById('player-cards');
+      el.innerHTML = '';
+      players.forEach((p, i) => {
+        const d = roundData[i];
+        const bonusActive = d.bid > 0 && d.bid === d.tricks;
+        const score = calcScore(d.bid, d.tricks, bonusActive ? d.bonus : 0, round);
+        const scoreClass = score > 0 ? 'pos' : score < 0 ? 'neg' : 'zero';
+        const scoreStr = score > 0 ? `+${score}` : `${score}`;
+
+        const card = document.createElement('div');
+        card.className = 'player-card';
+        card.innerHTML = `
+          <div class="player-name">${escHtml(p.name)}</div>
+          <div class="fields">
+            <div class="field-col">
+              <div class="field-label">Pari</div>
+              <div class="counter">
+                <button class="btn-counter" data-action="bid-" data-i="${i}" ${d.bid <= 0 ? 'disabled' : ''}>&#x2212;</button>
+                <span class="counter-val">${d.bid}</span>
+                <button class="btn-counter" data-action="bid+" data-i="${i}" ${d.bid >= round ? 'disabled' : ''}>+</button>
+              </div>
+            </div>
+            <div class="field-col">
+              <div class="field-label">Plis réalisés</div>
+              <div class="counter">
+                <button class="btn-counter" data-action="tricks-" data-i="${i}" ${d.tricks <= 0 ? 'disabled' : ''}>&#x2212;</button>
+                <span class="counter-val">${d.tricks}</span>
+                <button class="btn-counter" data-action="tricks+" data-i="${i}" ${d.tricks >= round ? 'disabled' : ''}>+</button>
+              </div>
+            </div>
+            <div class="field-col">
+              <div class="field-label">Bonus</div>
+              <div class="counter">
+                <button class="btn-counter" data-action="bonus-" data-i="${i}" ${!bonusActive || d.bonus <= 0 ? 'disabled' : ''}>&#x2212;</button>
+                <span class="counter-val" style="color:${bonusActive ? 'inherit' : 'var(--text-dim)'}">${d.bonus}</span>
+                <button class="btn-counter" data-action="bonus+" data-i="${i}" ${!bonusActive ? 'disabled' : ''}>+</button>
+              </div>
+              <div class="bonus-note">${bonusActive ? 'par tranche de 10' : 'pari non atteint'}</div>
+            </div>
+          </div>
+          <div class="round-score">Score manche&nbsp;: <span class="val ${scoreClass}">${scoreStr}</span></div>
+        `;
+        el.appendChild(card);
+      });
+    }
+
+    document.getElementById('player-cards').addEventListener('click', e => {
+      const btn = e.target.closest('.btn-counter');
+      if (!btn || btn.disabled) return;
+      const { action, i } = btn.dataset;
+      const d = roundData[+i];
+      if (action === 'bid+')    d.bid    = Math.min(d.bid + 1, round);
+      if (action === 'bid-')    d.bid    = Math.max(d.bid - 1, 0);
+      if (action === 'tricks+') d.tricks = Math.min(d.tricks + 1, round);
+      if (action === 'tricks-') d.tricks = Math.max(d.tricks - 1, 0);
+      if (action === 'bonus+')  d.bonus += 10;
+      if (action === 'bonus-')  d.bonus  = Math.max(d.bonus - 10, 0);
+      renderCards();
+      renderMini();
+    });
+
+    document.getElementById('btn-validate').addEventListener('click', () => {
+      const roundHistory = players.map((p, i) => {
+        const d = roundData[i];
+        const bonusActive = d.bid > 0 && d.bid === d.tricks;
+        const score = calcScore(d.bid, d.tricks, bonusActive ? d.bonus : 0, round);
+        p.total += score;
+        return { bid: d.bid, tricks: d.tricks, bonus: bonusActive ? d.bonus : 0, score };
+      });
+      history.push(roundHistory);
+      if (round >= MAX_ROUNDS) {
+        showEnd();
+      } else {
+        round++;
+        startRound();
+      }
+    });
+
+    function renderFullScoreboard() {
+      const el = document.getElementById('scoreboard-full');
+      if (history.length === 0) { el.classList.add('hidden'); return; }
+      el.classList.remove('hidden');
+      const maxTotal = Math.max(...players.map(p => p.total));
+      document.getElementById('scoreboard-head').innerHTML =
+        `<tr><th>Joueur</th>${history.map((_, r) => `<th>M${r + 1}</th>`).join('')}<th>Total</th></tr>`;
+      document.getElementById('scoreboard-body').innerHTML = players.map((p, i) => {
+        const cells = history.map(rnd => {
+          const s = rnd[i].score;
+          const c = s > 0 ? 'var(--green)' : s < 0 ? 'var(--red)' : 'var(--text-dim)';
+          return `<td style="color:${c}">${s > 0 ? '+' : ''}${s}</td>`;
+        }).join('');
+        return `<tr class="${p.total === maxTotal ? 'leader' : ''}">
+          <td>${escHtml(p.name)}</td>${cells}<td><strong>${p.total}</strong></td>
+        </tr>`;
+      }).join('');
+    }
+
+    // ── FIN ───────────────────────────────────────────────
+
+    function showEnd() {
+      showView('view-end');
+      const sorted = [...players].sort((a, b) => b.total - a.total);
+      const winner = sorted[0];
+      document.getElementById('podium').innerHTML = `
+        <div class="podium-trophy">&#9760;</div>
+        <div class="podium-name">${escHtml(winner.name)}</div>
+        <div class="podium-score">${winner.total} points</div>
+      `;
+      document.getElementById('final-head').innerHTML = `<tr><th>#</th><th>Joueur</th><th>Total</th></tr>`;
+      document.getElementById('final-body').innerHTML = sorted.map((p, i) =>
+        `<tr class="${i === 0 ? 'leader' : ''}">
+          <td>${i + 1}</td><td>${escHtml(p.name)}</td><td><strong>${p.total}</strong></td>
+        </tr>`
+      ).join('');
+    }
+
+    document.getElementById('btn-restart').addEventListener('click', () => {
+      showView('view-setup');
+      initSetup();
+    });
+
+    // ── UTILS ─────────────────────────────────────────────
+
+    function showView(id) {
+      ['view-setup', 'view-round', 'view-end'].forEach(v =>
+        document.getElementById(v).classList.toggle('hidden', v !== id)
+      );
+    }
+
+    function escHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Init
+    initSetup();
+  </script>
+</body>
+</html>
