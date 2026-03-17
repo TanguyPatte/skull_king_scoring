@@ -515,6 +515,8 @@
           <td>${escHtml(p.name)}</td>${cells}<td><strong>${p.total}</strong></td>
         </tr>`;
       }).join('');
+      const scroll = el.querySelector('.scoreboard-scroll');
+      if (scroll) scroll.scrollLeft = scroll.scrollWidth;
     }
 
     // ── FIN ───────────────────────────────────────────────
