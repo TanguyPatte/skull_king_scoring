@@ -424,7 +424,7 @@
       el.innerHTML = '';
       players.forEach((p, i) => {
         const d = roundData[i];
-        const bonusActive = d.bid > 0 && d.bid === d.tricks;
+        const bonusActive = d.bid === d.tricks;
         const score = calcScore(d.bid, d.tricks, bonusActive ? d.bonus : 0, round);
         const scoreClass = score > 0 ? 'pos' : score < 0 ? 'neg' : 'zero';
         const scoreStr = score > 0 ? `+${score}` : `${score}`;
@@ -484,7 +484,7 @@
     document.getElementById('btn-validate').addEventListener('click', () => {
       const roundHistory = players.map((p, i) => {
         const d = roundData[i];
-        const bonusActive = d.bid > 0 && d.bid === d.tricks;
+        const bonusActive = d.bid === d.tricks;
         const score = calcScore(d.bid, d.tricks, bonusActive ? d.bonus : 0, round);
         p.total += score;
         return { bid: d.bid, tricks: d.tricks, bonus: bonusActive ? d.bonus : 0, score };
